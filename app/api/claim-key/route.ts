@@ -32,7 +32,27 @@ export async function POST(request: Request) {
     const claimedKeys: { productId: string; key: string }[] = []
     
     for (const item of lineItems) {
-      const productId = (item.price?.product as { metadata?: { product_id?: string } })?.metadata?.product_id
+      // The product metadata is nested in the expanded price.product object
+      const product = item.price?.product as { metadata?: { product_id?: string }; name?: string } | string
+      let productId: string | undefined
+      
+      // Handle both expanded product object and string product ID
+      if (typeof product === 'object' && product?.metadata?.product_id) {
+        productId = product.metadata.product_id
+      } else {
+        // Fallback: try to match by product name
+        const productName = typeof product === 'object' ? product?.name : undefined
+        if (productName) {
+          // Map product names to IDs
+          const nameToId: Record<string, string> = {
+            'Weekly Key': 'shadow-weekly',
+            'Monthly Key': 'shadow-monthly',
+            'Lifetime Key': 'shadow-lifetime',
+          }
+          productId = nameToId[productName]
+        }
+      }
+      
       const quantity = item.quantity || 1
       
       if (productId) {
@@ -60,7 +80,7 @@ export async function POST(request: Request) {
     }
     
     if (claimedKeys.length === 0) {
-      return NextResponse.json({ error: 'No valid products found' }, { status: 400 })
+      return NextResponse.json({ error: 'No valid products found in session' }, { status: 400 })
     }
     
     return NextResponse.json({ 
