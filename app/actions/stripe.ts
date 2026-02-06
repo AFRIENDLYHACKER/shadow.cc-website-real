@@ -49,6 +49,7 @@ export async function startCheckoutSession(cartItems: CartItem[]) {
     mode: 'payment',
     return_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
     metadata: cartMetadata,
+    allow_promotion_codes: true,
   })
 
   return { clientSecret: session.client_secret }
