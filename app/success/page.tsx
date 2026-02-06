@@ -31,7 +31,6 @@ export default function SuccessPage() {
       return
     }
 
-    // Claim key from the keys.txt file
     fetch('/api/claim-key', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,7 +46,6 @@ export default function SuccessPage() {
           setClaimedKeys(data.keys)
           setCustomerEmail(data.email || '')
         } else if (data.key) {
-          // Key was already claimed for this session
           setStatus('success')
           setClaimedKeys([{ productId: 'unknown', key: data.key }])
         } else {
@@ -70,10 +68,10 @@ export default function SuccessPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Processing your payment and retrieving your key...</p>
+          <div className="w-12 h-12 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-5" />
+          <p className="text-zinc-500 text-xs font-mono tracking-wider">PROCESSING PAYMENT...</p>
         </div>
       </div>
     )
@@ -81,27 +79,21 @@ export default function SuccessPage() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center px-4 py-8">
+        <div className="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-6 sm:p-8 max-w-md w-full text-center">
+          <div className="w-12 h-12 border border-red-600/30 bg-red-600/5 rounded-md flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Something Went Wrong</h1>
-          <p className="text-gray-400 mb-6">{errorMessage || 'Please contact support with your payment confirmation.'}</p>
-          <div className="flex gap-3">
-            <Link
-              href="/"
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
-            >
-              Return to Shop
+          <h1 className="text-lg font-mono font-bold text-white mb-2 tracking-wide">ERROR</h1>
+          <p className="text-zinc-500 text-sm font-mono mb-6">{errorMessage || 'Please contact support with your payment confirmation.'}</p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/" className="flex-1 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] hover:bg-white/[0.05] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md transition-all text-center text-xs tracking-wider">
+              RETURN TO SHOP
             </Link>
-            <Link
-              href="/support"
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
-            >
-              Contact Support
+            <Link href="/support" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-mono font-semibold py-3 px-6 rounded-md transition-all text-center text-xs tracking-wider glow-red">
+              CONTACT SUPPORT
             </Link>
           </div>
         </div>
@@ -110,45 +102,46 @@ export default function SuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 max-w-lg w-full">
+    <div className="min-h-screen bg-[#030303] flex items-center justify-center px-4 py-8">
+      <div className="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-5 sm:p-8 max-w-lg w-full">
+        {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 border border-green-500/30 bg-green-500/5 rounded-md flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Payment Successful!</h1>
-          <p className="text-gray-400">Thank you for your purchase</p>
+          <h1 className="text-lg sm:text-xl font-mono font-bold text-white tracking-wide mb-1">PAYMENT SUCCESSFUL</h1>
+          <p className="text-zinc-500 text-xs font-mono">Thank you for your purchase</p>
           {customerEmail && (
-            <p className="text-gray-500 text-sm mt-1">Receipt sent to {customerEmail}</p>
+            <p className="text-zinc-600 text-[10px] font-mono mt-1 tracking-wider">Receipt sent to {customerEmail}</p>
           )}
         </div>
 
-        {/* Display all claimed keys */}
+        {/* Keys */}
         {claimedKeys.map((claimed, index) => (
-          <div key={index} className="bg-black border border-zinc-700 rounded-xl p-4 sm:p-6 mb-4">
+          <div key={index} className="bg-black border border-zinc-800 rounded-lg p-4 sm:p-5 mb-3">
             <div className="flex items-center justify-between mb-3 gap-2">
-              <span className="text-gray-400 text-sm font-medium">
-                {productNames[claimed.productId] || 'LICENSE KEY'} #{index + 1}
+              <span className="text-zinc-500 text-xs font-mono tracking-wider">
+                {(productNames[claimed.productId] || 'LICENSE KEY').toUpperCase()} #{index + 1}
               </span>
-              <span className="bg-red-600/20 text-red-400 text-xs px-2 py-1 rounded">SAVE THIS</span>
+              <span className="bg-red-600/10 border border-red-600/30 text-red-400 text-[10px] font-mono px-2 py-0.5 rounded tracking-widest">SAVE THIS</span>
             </div>
-            <div className="flex items-center gap-3">
-              <code className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-lg font-mono text-white tracking-wider overflow-x-auto break-all min-w-0">
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-[#0a0a0a] border border-zinc-800 rounded-md px-3 py-2.5 text-sm font-mono text-white tracking-wider overflow-x-auto break-all min-w-0">
                 {claimed.key}
               </code>
               <button
                 onClick={() => copyToClipboard(claimed.key, index)}
-                className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 rounded-lg p-3 transition-colors flex-shrink-0"
+                className="border border-zinc-800 hover:border-zinc-600 bg-[#0a0a0a] rounded-md p-2.5 transition-colors flex-shrink-0"
                 title="Copy to clipboard"
               >
                 {copiedIndex === index ? (
-                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 )}
@@ -157,45 +150,38 @@ export default function SuccessPage() {
           </div>
         ))}
 
-        <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4 mb-6">
-          <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* How to Redeem */}
+        <div className="bg-black border border-zinc-800 rounded-lg p-4 mb-3">
+          <h3 className="text-xs font-mono font-bold text-white tracking-widest mb-3 flex items-center gap-2">
+            <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            How to Redeem
+            HOW TO REDEEM
           </h3>
-          <ol className="text-gray-400 text-sm space-y-2 list-decimal list-inside">
+          <ol className="text-zinc-500 text-xs font-mono space-y-1.5 list-decimal list-inside">
             <li>Open your executor and load the script</li>
             <li>When prompted, paste your license key</li>
             <li>Click verify and enjoy the features</li>
           </ol>
         </div>
 
-        <div className="bg-red-600/10 border border-red-600/30 rounded-xl p-4 mb-6">
-          <p className="text-red-400 text-sm flex items-start gap-2">
-            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* Warning */}
+        <div className="bg-red-600/5 border border-red-600/20 rounded-lg p-4 mb-6">
+          <p className="text-red-400/80 text-xs font-mono flex items-start gap-2">
+            <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span>
-              <strong>Important:</strong> Save your license key now! This key is tied to your HWID and cannot be recovered if lost.
-            </span>
+            <span>Save your license key now. This key is tied to your HWID and cannot be recovered if lost.</span>
           </p>
         </div>
 
+        {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link
-            href="/"
-            className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center text-sm sm:text-base"
-          >
-            Back to Shop
+          <Link href="/" className="flex-1 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] hover:bg-white/[0.05] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md transition-all text-center text-xs tracking-wider">
+            BACK TO SHOP
           </Link>
-          <a
-            href="https://discord.gg/shadow"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center text-sm sm:text-base"
-          >
-            Join Discord
+          <a href="https://discord.gg/shadow" target="_blank" rel="noopener noreferrer" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-mono font-semibold py-3 px-6 rounded-md transition-all text-center text-xs tracking-wider glow-red">
+            JOIN DISCORD
           </a>
         </div>
       </div>
