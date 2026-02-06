@@ -12,7 +12,7 @@ async function createPromoCodes() {
   for (const { coupon, code } of codes) {
     try {
       const promoCode = await stripe.promotionCodes.create({
-        coupon,
+        promotion: { type: 'coupon', coupon },
         code,
         active: true,
       })
