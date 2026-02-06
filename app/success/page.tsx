@@ -97,14 +97,12 @@ export default function SuccessPage() {
             >
               Return to Shop
             </Link>
-            <a
-              href="https://discord.gg/shadow"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/support"
               className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors text-center"
             >
               Contact Support
-            </a>
+            </Link>
           </div>
         </div>
       </div>
