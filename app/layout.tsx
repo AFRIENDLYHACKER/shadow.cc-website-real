@@ -16,8 +16,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Shadow.CC | Premium Digital Services',
-  description: 'Premium digital services with instant delivery. Secure, reliable, and always available.',
+  title: 'Shadow.CC | Premium Digital Services & Software',
+  description: 'Premium digital services including custom websites, Discord bots, AI solutions, Roblox scripts, and security software. Secure, reliable, and always available.',
   generator: 'v0.app',
   icons: {
     icon: [
