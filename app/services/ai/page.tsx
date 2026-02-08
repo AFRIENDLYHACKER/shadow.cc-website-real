@@ -16,20 +16,20 @@ export default function AIPage() {
       tiers={[
         {
           name: 'AI Chatbot',
-          price: '$50',
+          price: '$25',
           description: 'Custom AI chatbot for your website or Discord with trained responses.',
           features: ['Custom Training Data', 'Website or Discord Integration', 'Natural Language Processing', 'Basic Analytics', 'Hosting Included'],
         },
         {
           name: 'AI Automation',
-          price: '$100',
+          price: '$60',
           description: 'Automate workflows with custom AI pipelines and integrations.',
           popular: true,
           features: ['Everything in Chatbot', 'Workflow Automation', 'API Integrations', 'Data Processing', 'Custom Triggers', 'Dashboard Access'],
         },
         {
           name: 'Custom AI System',
-          price: '$250+',
+          price: '$150+',
           description: 'Fully custom AI solution built from scratch for your specific use case.',
           features: ['Everything in Automation', 'Custom Model Training', 'Advanced Analytics', 'Multi-Platform Deploy', 'Dedicated Support', 'Ongoing Updates'],
         },

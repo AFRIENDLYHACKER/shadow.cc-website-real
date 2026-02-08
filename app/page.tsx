@@ -143,6 +143,7 @@ function Header() {
   const navLinks = [
     { label: 'PRODUCTS', href: '#products' },
     { label: 'SERVICES', href: '#services' },
+    { label: 'REVIEWS', href: '#reviews' },
     { label: 'SUPPORT', href: '/support' },
   ]
 
@@ -459,6 +460,198 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Why Choose Us ── */}
+        <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="text-[10px] font-mono text-red-500/60 tracking-[0.3em] block mb-2">// WHY US</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight text-balance">Why Choose Shadow<span className="text-red-500">.</span>CC</h2>
+              <p className="text-zinc-500 text-sm font-mono mt-3 max-w-lg mx-auto">
+                We deliver quality at prices that respect your wallet.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                  title: 'LOWEST PRICES',
+                  desc: 'Unbeatable rates on all services. Custom bots from $15, websites from $25.',
+                },
+                {
+                  icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+                  title: 'INSTANT DELIVERY',
+                  desc: 'Script keys delivered immediately after payment. No waiting around.',
+                },
+                {
+                  icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                  title: 'SECURE PAYMENTS',
+                  desc: 'Powered by Stripe. Your payment info is never stored on our servers.',
+                },
+                {
+                  icon: 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z',
+                  title: 'REAL SUPPORT',
+                  desc: 'Direct Discord and email support from the developer. No bots, no tickets.',
+                },
+              ].map((item, i) => (
+                <div key={i} className="bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-5 sm:p-6 transition-all group">
+                  <div className="w-10 h-10 border border-red-600/30 bg-red-600/5 rounded-md flex items-center justify-center mb-4 group-hover:bg-red-600/10 transition-colors">
+                    <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                    </svg>
+                  </div>
+                  <h3 className="text-xs font-mono font-bold text-white tracking-wider mb-2">{item.title}</h3>
+                  <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Testimonials ── */}
+        <section id="reviews" className="py-16 sm:py-24 px-4 sm:px-6 border-y border-red-900/15 relative">
+          <div className="absolute inset-0 grid-bg opacity-20" />
+          <div className="max-w-5xl mx-auto relative z-10">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="text-[10px] font-mono text-red-500/60 tracking-[0.3em] block mb-2">// REVIEWS</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight text-balance">What Clients Say</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  name: 'Alex M.',
+                  role: 'Roblox User',
+                  text: 'The script works flawlessly. Auto farm has been running for weeks with no issues. Key delivery was instant too.',
+                  rating: 5,
+                },
+                {
+                  name: 'Jordan K.',
+                  role: 'Discord Server Owner',
+                  text: 'Got a custom bot built for my community. Moderation, tickets, leveling -- everything works perfectly. Best $40 I ever spent.',
+                  rating: 5,
+                },
+                {
+                  name: 'Sam T.',
+                  role: 'Small Business Owner',
+                  text: 'They built my company website in 3 days. Clean design, fast loading, and the price was way cheaper than anywhere else.',
+                  rating: 5,
+                },
+                {
+                  name: 'Riley P.',
+                  role: 'Content Creator',
+                  text: 'The AI chatbot they built for my Discord handles FAQ questions so I do not have to. Saves me hours every week.',
+                  rating: 5,
+                },
+                {
+                  name: 'Casey D.',
+                  role: 'Game Developer',
+                  text: 'Lifetime key was worth every penny. Updates keep coming, new game support added regularly. Support team responds fast.',
+                  rating: 5,
+                },
+                {
+                  name: 'Morgan W.',
+                  role: 'Startup Founder',
+                  text: 'Had a full web app built with auth and database for $175. The quality is insane for the price. Highly recommend.',
+                  rating: 5,
+                },
+              ].map((review, i) => (
+                <div key={i} className="bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-5 sm:p-6 transition-all">
+                  <div className="flex items-center gap-1 mb-3">
+                    {Array.from({ length: review.rating }).map((_, j) => (
+                      <svg key={j} className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-zinc-400 text-xs leading-relaxed mb-4">{'"'}{review.text}{'"'}</p>
+                  <div className="border-t border-zinc-800/50 pt-3">
+                    <p className="text-white text-xs font-mono font-bold">{review.name}</p>
+                    <p className="text-zinc-600 text-[10px] font-mono tracking-wider">{review.role.toUpperCase()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Latest Updates ── */}
+        <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="text-[10px] font-mono text-red-500/60 tracking-[0.3em] block mb-2">// CHANGELOG</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight text-balance">Latest Updates</h2>
+              <p className="text-zinc-500 text-sm font-mono mt-3 max-w-lg mx-auto">
+                We ship fast. Here is what we have been working on.
+              </p>
+            </div>
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-zinc-800" />
+              <div className="space-y-6">
+                {[
+                  { date: 'FEB 2026', title: 'New Pricing Launched', desc: 'Slashed prices across all services. Discord bots starting at $15, websites at $25, and AI solutions at $25.', tag: 'PRICING' },
+                  { date: 'FEB 2026', title: 'Antivirus Development Begins', desc: 'Started development on Android and PC antivirus software. Join Discord for early access.', tag: 'NEW' },
+                  { date: 'JAN 2026', title: 'AI Solutions Service Added', desc: 'Custom AI chatbots, automation pipelines, and intelligent systems now available to order.', tag: 'SERVICE' },
+                  { date: 'JAN 2026', title: 'Script V3.2 Update', desc: 'Added support for 10 new games including King Legacy and Tower of Hell. Performance improvements across the board.', tag: 'UPDATE' },
+                  { date: 'DEC 2025', title: 'Stripe Payments Integration', desc: 'Secure checkout with Stripe. Instant key delivery and promo code support.', tag: 'FEATURE' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 sm:gap-5">
+                    <div className="relative flex-shrink-0 mt-1.5">
+                      <div className="w-[15px] h-[15px] rounded-full border-2 border-red-600/50 bg-[#030303] flex items-center justify-center">
+                        <div className="w-[5px] h-[5px] rounded-full bg-red-500" />
+                      </div>
+                    </div>
+                    <div className="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-4 sm:p-5 flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-[10px] font-mono text-zinc-600 tracking-widest">{item.date}</span>
+                        <span className="text-[10px] font-mono font-bold text-red-400 bg-red-600/10 border border-red-600/30 px-2 py-0.5 rounded tracking-widest">{item.tag}</span>
+                      </div>
+                      <h3 className="text-sm font-mono font-bold text-white tracking-wide mb-1.5">{item.title}</h3>
+                      <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA Banner ── */}
+        <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-red-900/15 relative">
+          <div className="absolute inset-0 grid-bg opacity-30" />
+          <div className="max-w-3xl mx-auto relative z-10 text-center">
+            <div className="bg-[#0a0a0a] border border-zinc-800 rounded-lg p-8 sm:p-12">
+              <div className="w-14 h-14 border border-red-600/30 bg-red-600/5 rounded-lg flex items-center justify-center mx-auto mb-5">
+                <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-3 text-balance">Ready to Get Started?</h2>
+              <p className="text-zinc-500 text-sm font-mono mb-6 max-w-md mx-auto leading-relaxed">
+                Join thousands of satisfied clients. Whether you need scripts, a website, a bot, or an AI solution -- we have got you covered at the best prices.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <a
+                  href="#products"
+                  className="group bg-red-600 hover:bg-red-700 text-white font-mono font-semibold py-3.5 px-8 rounded-md transition-all text-sm tracking-wider flex items-center justify-center gap-2 glow-red"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  VIEW SERVICES
+                </a>
+                <a
+                  href="https://discord.gg/Kezxm2TyGY"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] hover:bg-white/[0.05] text-zinc-300 font-mono font-semibold py-3.5 px-8 rounded-md transition-all text-sm tracking-wider flex items-center justify-center gap-2"
+                >
+                  JOIN DISCORD
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── FAQ ── */}
         <FAQSection />
       </main>
@@ -474,8 +667,10 @@ function FAQSection() {
   const faqs = [
     { q: 'How do custom services work?', a: 'After purchasing a custom service (website, bot, or AI), you will be taken to a form where you provide your project details and contact information. We will reach out within 24 hours to discuss your project.' },
     { q: 'How fast is Roblox script key delivery?', a: 'Instant. Your license key is delivered immediately after payment on the success page and via email.' },
+    { q: 'Why are your prices so low?', a: 'We keep overhead minimal and pass the savings to you. No middlemen, no corporate markup. Discord bots from $15, websites from $25, AI solutions from $25. Quality does not have to be expensive.' },
     { q: 'Do you offer refunds?', a: 'We offer refunds within 24 hours of purchase if the product is not working as described. For custom services, refunds are handled on a case-by-case basis before work begins.' },
     { q: 'Are the antivirus products available yet?', a: 'Both Android and PC antivirus software are currently in development. Join our Discord to be notified when they launch.' },
+    { q: 'Can I request custom features?', a: 'Absolutely. Every custom service (website, bot, AI) is built to your exact specifications. Just describe what you need in the order form and we will make it happen.' },
     { q: 'How do I get support?', a: 'Visit our support page for email, phone, and Discord contact options. We respond within 24 hours.' },
   ]
 

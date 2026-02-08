@@ -16,20 +16,20 @@ export default function WebsitePage() {
       tiers={[
         {
           name: 'Landing Page',
-          price: '$50',
+          price: '$25',
           description: 'Single page website with modern design and responsive layout.',
           features: ['1 Page Design', 'Mobile Responsive', 'Contact Form', 'Basic SEO', 'Hosting Setup'],
         },
         {
           name: 'Multi-Page Site',
-          price: '$150',
+          price: '$80',
           description: 'Full website with multiple pages, custom functionality, and CMS.',
           popular: true,
           features: ['Up to 5 Pages', 'Custom Design', 'CMS Integration', 'Advanced SEO', 'Analytics Setup', 'Hosting Included'],
         },
         {
           name: 'Web Application',
-          price: '$300+',
+          price: '$175+',
           description: 'Full-stack web application with authentication, database, and custom features.',
           features: ['Unlimited Pages', 'Full-Stack Development', 'User Authentication', 'Database Integration', 'API Development', 'Ongoing Support'],
         },

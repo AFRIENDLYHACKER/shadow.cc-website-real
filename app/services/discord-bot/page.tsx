@@ -16,20 +16,20 @@ export default function DiscordBotPage() {
       tiers={[
         {
           name: 'Basic Bot',
-          price: '$30',
+          price: '$15',
           description: 'Simple bot with core commands and basic moderation features.',
           features: ['Custom Commands', 'Basic Moderation', 'Welcome Messages', 'Role Management', 'Hosting Included'],
         },
         {
           name: 'Advanced Bot',
-          price: '$75',
+          price: '$40',
           description: 'Feature-rich bot with advanced systems and integrations.',
           popular: true,
           features: ['Everything in Basic', 'Ticket System', 'Leveling System', 'Music Player', 'Custom Embeds', 'Dashboard Panel'],
         },
         {
           name: 'Enterprise Bot',
-          price: '$150+',
+          price: '$85+',
           description: 'Fully custom bot with complex features, APIs, and database integration.',
           features: ['Everything in Advanced', 'Economy System', 'API Integrations', 'Database Backend', 'Custom Dashboard', 'Ongoing Maintenance'],
         },
