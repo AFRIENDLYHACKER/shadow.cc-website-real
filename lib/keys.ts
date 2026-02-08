@@ -1,133 +1,105 @@
 import { Redis } from '@upstash/redis'
+import fs from 'fs'
+import path from 'path'
+import crypto from 'crypto'
 
 const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
   token: process.env.KV_REST_API_TOKEN!,
 })
 
-// Redis key naming:
-//   keys:{productId}  -> List of available keys for that product
-//   keys:seeded:v3    -> Versioned flag to track seeding (bump version to force re-seed)
-
-const SEED_FLAG = 'keys:seeded:v3'
 const PRODUCT_IDS = ['shadow-weekly', 'shadow-monthly', 'shadow-lifetime'] as const
+const REDIS_KEYS = PRODUCT_IDS.map((id) => `keys:${id}`)
 
-// Actual keys from data/keys.txt
-const STOCK_KEYS: Record<string, string[]> = {
-  'shadow-weekly': [
-    'DOPNkEWOdJGYahufUKTQnQqJgQSrsuUy','aultjeIMWYHznwPqVVaEoxPZHslOfJnh',
-    'ZabFmCDPvIAovuiFJnDrYHLDmcMNXTsr','JOiZuDjbAbpptTVfvOaNrmgLrAlMZXsI',
-    'kPAGUyOlIhHiHTVZQUcCDkmfwkKLBmjC','kZdrsWkzdscojDHaBBaDfDKwMPfwMBKV',
-    'cOPhqDJweWDGbIWepBrhGDgdJVZXuHeQ','bxRIlwThWnRAXhaXPQYwkQaWtMsPJLvj',
-    'CepFWHvqugAZODbUJUZdWqrHcvWlxakJ','vPnZFCwJdhCfxHBPWucUMjHNEHtjjOGF',
-    'WkhJFtsPCbENChKnWvyBPjoQNJnWrTGk','GRzdzxXaJAYwpOqIRqjwicpLzMDqfiXF',
-    'MdMYpeIyztFmatzkGEblxEROYKGQRRUo','xTPsYnVZAuEyRfVTPjLgNCJCjEXrnNyc',
-    'QzawqTJgYBSAOTRmvpOOMBzPbCcwvWIH','mryZeMoNSpyPEDJuSvTHunTkBWXCQrqy',
-    'TwSyROdwgaLYcBKDFwvPsgocvSXbrCTh','IGOQdGhEDsJFiktVBrcjtCgxaGKFldRd',
-    'IRjLbypvYzeCLlxyFcRgxhwOUIPnuXpO','duqVaiJfgJptCCzfVOlDpLrzdeWWjiea',
-    'aqEFxxTssLtJNdOhwbszJlbbtAwCSnYP','tzZetnjhkcPsIRBumDUrHmUAOWumeUwz',
-    'aeirUtBJpYsQFaFveOKSdQTKVADFzAOo','WbbbQxnsTjeRoRkLtoWNhbVAzhsNAfPj',
-    'DTGesQgyxZIefmAHGCXgdoXwYmWueSSl','SMFfDjXJJZrKsQTQfgFfjtuZjQVaEHqq',
-    'arzqRJyHBXyebHUnHTBdhUaVxDHbwMLy','pMOhqdeZSucqNDVNbqBZbrhMNdbVNwyu',
-    'AgCHZYzwYCMjUDRSiBTJdsCEvtPUhQeX','QapGqtJaValcPKtsNQbPBzHvNQKwCKuO',
-    'KHLyfkvPDOMAdRXbCBIVXlcMuxiskSzS','bSxPgDoHISrJkncWonkyjRIvBcgUxZfz',
-    'TulxpHEKZWxAjMRVrbXUAZquibpyrmyr','fBKKvyKpDjfZJIDjtZriVUvHGTemeBza',
-    'zcXbpKEobJzHolMpYhioqyInmQGunGnb','stfIwsiJtAbLhfnuywxnIpwcNCgHPRXg',
-    'kKfbxffAiZrpufDCVgbmwahvrdEhbIkg','PYExmeSfQlKrGgAHYRmxScXItUIAIKgc',
-    'FbFnYhusSUscuvPbIuuuWdQtMvqAoNFY','UXdMFKzlvrUOqLoyWgIhDOPvrGsrguaZ',
-    'CYcYZGgzDUUffxfPPsKSlLnGkYsLxQTB','WMZmErPHqekANOKOMwLbpimxDOSSNvAT',
-    'GITzfinZMjSXMvOrOkZsGrfmSEPOQoGl','vFGvQRyqyyKwleAsRnHxKgGICeDkNYGi',
-    'ZlIFgYMOJmCWyurUbodMwkqerwzGLVyT','CngGhThzZbRgoVKwrIORntRgEENrWApL',
-    'FMgBHbPfqRrtuWgekJzsRwLiOurmHcwk','qjVAfwmwlIZLnQHneqVvLsVzAcpkLsIX',
-    'gzhYKAyDvkKZCHDuwFFylmCgfrcqqlfH','RdjQGSBgGALiQxowTBDauwkIMCwvMnxR',
-  ],
-  'shadow-monthly': [
-    'dXdQijzNzktbbaazeVYdpVcqGdKkttHl','mmFPJJRuGQjLHlXopWiAzgCJORFKOLHB',
-    'rLzsIJEdhEokvPfPOQSpvwhgfuGHHeEv','lJTXECzkvUGMfQrSDANywabnCppkxwaB',
-    'SNebYgqXCEjqbWeSBZFSOyqPuYyBtCAE','xRHjcIHQoHXSTjgDzTZRmTkwIaTKDthq',
-    'rIGXGRzUbzrzayBAbgfMqOnRCVztEFMc','iZBRgTaIhSFejqFAnnixOvftbgpDFGVw',
-    'EaopApEMBgLyZWfYAUvrUsWaPjLAWyfF','pahnoadmhSltUqjuJCauJIGpKbHLbXzu',
-    'KCnLDgWnpQBtKJBQnLdcnPBOgWpJTEft','aqJGMJFaTXbBlAxCVWWTfgjzJezJnCzX',
-    'dcpCtrZGXChSyKeZmXOFkIHQNbcpoUih','iMcYJUPCLNXKiHWVUbqZHDNHLVKPrPjf',
-    'nybaGClBeuWTNpAviYehMNODiaJbwDSu','kUqOwXxFCXgniUuNbUfbscEyJXuaVfwU',
-    'sgExBOFAVsftSwczlpsQIdbuoLajDEPZ','ubuOstXpAYmRrfHYUJsAUEHlGmzOEjYv',
-    'RskTkjgVOveJZIELPUoeMbhHnsUnLLGp','bXiQQfdtZHrfFikqlqpvFKDJytwINuCX',
-    'UvHjgYrFEvWgJLsbKynRKQTfHafQOdMT','NxIRxzUdwlxaNaXQjaWAtRHZuCdZOvPJ',
-    'XlBDdbdZKLZdDoEEbHSuueHswfSsbnQK','nvhEwrevSCpsrFjskfotoPxNinfnGSpD',
-    'rtqseXvNjjPowVRImqnCNtoLhFxpTMPL','nutKaVHjwFMlPRzOyGLHxvfffCkjgXDy',
-    'MylWgouqlsUscQuBycYCPatxUaBxnUBy','SgYSlfdUizflHeZtAnlaVkgOPIxSqYQJ',
-    'gDZpVygAFTpxnIvhjkreaJpQayPeTipl','vWekMjowAUybzYScgDtBSycXgWiUctGX',
-    'COIvxBHeqXUFXyGieImBMzDnkRmUNdwe','oYkfVWrmETigWFDKlGjAiBaoxuZeJEyp',
-    'VfAXUwFsvuNgoQjGeNEihVlgKInvsoDb','YogUgIfXShPSpzSfhkVazRAeOZOERBpQ',
-    'wXEqHgJDTJvdcRJXoddyvhHgMqnAuEUw','NikHXfjCXUqMaObJmUkyoHDoXsBmqpBf',
-    'aJqugvLeaZRleIaGUBxdqmVjqclAjyUO','AvmQJaBNnPNNiyemkOCuigDKFevnIDnA',
-    'LWQrayILEvBebFKzqPSFlZbXwNbedniy','NXjESRCSSxewhXfTwclyorfuIIPfeeBe',
-    'ncFuTlDHIiHAuegmEDoowuGAxpXZhiod','ccRMfYpLAYnlchJHjBEKwzxPoatWVijd',
-    'uvAzkctDpvxoNmgUzaNXPljzAcFogFir','AMrwINhnidLMXvLZwflglbepKCUiTYww',
-    'hWdDhPqyxVXBdzjqnTnJiFwnzGBMYBTD','REoRuSWHhqKHrTgCZGhJxUmfOoaMAKvn',
-    'FgwrTOCKfLdpHcZsugNuKhZOZBWvVlZT','rjOlPLgpUBauvnlRjzaobjFPqkbLnoBN',
-    'DhAsCSdwrIrtlmULIdxDZQNnUUGZjORN','FFIUUgCXjSwddMvgUKXshFMwOspdlVNs',
-  ],
-  'shadow-lifetime': [
-    'ZrJVXLpDMhSXrFrcOyCgbfECeNjbXkts','iciEIMDDfqhcpsyAWUTrSlWGjVcBotpv',
-    'MbEmKVpoJOBOgiIlTDYdbNdYuYyunJVx','CaveYXHaBQAxLTnOFCvinKcdedcMtBvM',
-    'SIMOdDAXkZnUALHlKLYvWbrQahrDHVQU','QOSWvEuPOdUIopjPjyqKSwZvQYDCxykj',
-    'DOQgPPCQtDyjreKjEzUytemCdDBDsESC','LZaknEBRBVGymACaUguyrJRiAQcZWmsV',
-    'URERbqNiohZlogyedtToZWSiMIfLNiqk','aoWFjoLLZPjmMfGQPnxcjYLClpPUOAZP',
-    'RJpkyebErWJoXAESuLHLuvySeQDiBmKs','NAOAvZxbfeuJuDnibJufUmphsWdgMsbe',
-    'TNodaTVddPAsrWnBvzJuYazWtdWbZkSZ','AHewnsNApCYhplKyrZXMhQAEgRBJBUcI',
-    'ttezLxNpUJAGaguDHvQfUUMTzvOzbunM','SRsBaEdsIiZLCCtCxnZgXjpCSuhVftJp',
-    'pciZEuoigQSsRMfDCZFfuUQcciNnCPFW','HqsCbPZXKZBVUhUBUpENFCyllCKfvzyt',
-    'xaGgSpwuvNbGPMWHdcqpugYbedsfRYae','XCSbTlrdrlleLLoJHJndMpNXBQteGKLR',
-    'PcCbdeFCKOzMKjwKMRRXJYXeTGMqwSeF','mFaUtaxfwFQKuojHBDFhbcQrHeIkVGHO',
-    'TTZVrGFdRKPFHeNHqrkuZSEQJtjfHAsA','ekmXugHstJoryqPbYcHLSCQgFhpdkxGC',
-    'FFNmVSWIiNJXZyKjpbcsgfZrDABFwcks','PwXGAhnHUHzanAZQzmJODzPfrCVuQDht',
-    'NuxaKDXaQJZPdLlJDKyMzbOTXvGUVTiS','VqLdwRpClQPPgcDAnpgkqbpVOHpTOZpK',
-    'kDXHHXfwWoDcZVCoEZwQhIwzXqBeXiDT','wUUyhMDjUffruJQATiUNrHpMjpgXeVjT',
-    'DQZFtOgBnJIelZVFYvAuIUsImqIVJyIL','PSgmbZBXZzGOXSLqSzOIutWSeRRAsOHL',
-    'hlKIPWWNnryfsLGjmspPZUHclOdIFaQV','lDLjrKMIoFLKgOQoQUdQtLujPzGPhLiu',
-    'XbaOKLnysztOOGNcXqTfFOoKDtJWguPH','cGZfLBInZDrIWLwJFSTjLaGcAEofskdT',
-    'kgXHHFHaFCCztmlIdluoVaMCdRkgepDd','VaslkrIIqStYueJKEIDLsRvcRccQAbCY',
-    'gBgLuUACpahRXnvWZEEJtfgNyTPyuSgs','LhIQrfgDIYsJYmcXvPrCBAADrUogCACV',
-    'ZYsdZEViYmcKVqLPYzDhpCEHAwqbkNEI','UXYZcbRSCUMzOoMrAwxfdirWsichgmgJ',
-    'ILHwLcSkdWoZspFZgExbOlVrHPfbGYeK','zmrVbBWjBNtHYffObhCvFbPXpecbwpBH',
-    'JIaKRFjfuvrcDjGbIpFBvLNZKLIpplYj','YTyRBFZZBLTqIeVmyoIZrdceDIyfftIt',
-    'aQUebsqHYAZMiuHsYncmEOduXlgVvIBF','xjVJKLsoDXRrUFXwqaLAVHOdySRwVqFy',
-    'BNFKjxXzrVIDaKlSggpWeTetLhObDzwT','KRjMAilaiziBwcERloSVDLGcIeSAsoIY',
-  ],
-}
+/**
+ * Parse data/keys.txt and return keys grouped by product ID.
+ * Format per line: KEY|PRODUCT_ID
+ * Lines starting with # or empty lines are ignored.
+ */
+function parseKeysFile(): Record<string, string[]> {
+  const filePath = path.join(process.cwd(), 'data', 'keys.txt')
+  const raw = fs.readFileSync(filePath, 'utf-8')
+  const result: Record<string, string[]> = {}
 
-// Auto-seed keys into Redis if they haven't been seeded yet
-async function ensureKeysSeeded(): Promise<void> {
-  const alreadySeeded = await redis.get(SEED_FLAG)
-  if (alreadySeeded) return
+  for (const id of PRODUCT_IDS) {
+    result[id] = []
+  }
 
-  // Clear any stale data from previous seeding attempts
-  await redis.del('keys:shadow-weekly', 'keys:shadow-monthly', 'keys:shadow-lifetime', 'keys:seeded', 'keys:seeded:v2')
-
-  // Seed keys in batches of 20 to stay within Upstash pipeline limits
-  for (const productId of PRODUCT_IDS) {
-    const keys = STOCK_KEYS[productId]
-    for (let i = 0; i < keys.length; i += 20) {
-      const batch = keys.slice(i, i + 20)
-      const pipeline = redis.pipeline()
-      for (const key of batch) {
-        pipeline.rpush(`keys:${productId}`, key)
-      }
-      await pipeline.exec()
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const [key, productId] = trimmed.split('|')
+    if (key && productId && result[productId]) {
+      result[productId]!.push(key)
     }
   }
 
-  await redis.set(SEED_FLAG, '1')
+  return result
 }
 
-// Get stock count for a specific product
+/**
+ * Hash the keys.txt content so we can detect changes across deploys.
+ */
+function getKeysFileHash(): string {
+  const filePath = path.join(process.cwd(), 'data', 'keys.txt')
+  const raw = fs.readFileSync(filePath, 'utf-8')
+  return crypto.createHash('sha256').update(raw).digest('hex').slice(0, 16)
+}
+
+/**
+ * Ensure Redis is synced with the current keys.txt.
+ * Runs on every cold start / first request. If the hash of keys.txt
+ * has changed since the last seed, Redis is cleared and re-seeded.
+ */
+let _seeded = false
+async function ensureKeysSeeded(): Promise<void> {
+  if (_seeded) return
+
+  const fileHash = getKeysFileHash()
+  const seedFlag = `keys:seed-hash`
+  const storedHash = await redis.get<string>(seedFlag)
+
+  if (storedHash === fileHash) {
+    _seeded = true
+    return
+  }
+
+  // Hash mismatch or first seed — clear and re-seed
+  const pipeline = redis.pipeline()
+  for (const rk of REDIS_KEYS) {
+    pipeline.del(rk)
+  }
+  await pipeline.exec()
+
+  const keys = parseKeysFile()
+
+  for (const productId of PRODUCT_IDS) {
+    const productKeys = keys[productId]
+    if (!productKeys || productKeys.length === 0) continue
+
+    // Push in batches of 20 to stay within Upstash pipeline limits
+    for (let i = 0; i < productKeys.length; i += 20) {
+      const batch = productKeys.slice(i, i + 20)
+      const batchPipeline = redis.pipeline()
+      for (const key of batch) {
+        batchPipeline.rpush(`keys:${productId}`, key)
+      }
+      await batchPipeline.exec()
+    }
+  }
+
+  // Store the hash so we don't re-seed until keys.txt changes
+  await redis.set(seedFlag, fileHash)
+  _seeded = true
+}
+
+// ── Public API ──
+
 export async function getStock(productId: string): Promise<number> {
   await ensureKeysSeeded()
   return redis.llen(`keys:${productId}`)
 }
 
-// Get stock for all products
 export async function getAllStock(): Promise<Record<string, number>> {
   await ensureKeysSeeded()
 
@@ -144,14 +116,12 @@ export async function getAllStock(): Promise<Record<string, number>> {
   return stock
 }
 
-// Claim a key for a product (pops from the list atomically)
 export async function claimKey(productId: string): Promise<string | null> {
   await ensureKeysSeeded()
   const key = await redis.lpop<string>(`keys:${productId}`)
   return key ?? null
 }
 
-// Add keys to Redis (for admin / seed use)
 export async function addKeys(entries: { key: string; productId: string }[]): Promise<boolean> {
   try {
     const pipeline = redis.pipeline()
