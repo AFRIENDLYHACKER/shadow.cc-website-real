@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { claimKey, getStock } from '@/lib/keys'
 import { stripe } from '@/lib/stripe'
+import { sendKeyDeliveryEmail } from '@/lib/email'
 
 interface CartItem {
   productId: string
@@ -95,11 +96,20 @@ export async function POST(request: Request) {
       console.error('Failed to update session metadata:', updateError)
       // Still return the keys even if metadata update fails
     }
+
+    // Send key delivery email to customer
+    const customerEmail = session.customer_details?.email
+    if (customerEmail) {
+      sendKeyDeliveryEmail({
+        customerEmail,
+        keys: claimedKeys,
+      }).catch(err => console.error('Failed to send key delivery email:', err))
+    }
     
     return NextResponse.json({ 
       success: true, 
       keys: claimedKeys,
-      email: session.customer_details?.email 
+      email: customerEmail 
     })
     
   } catch (error) {
