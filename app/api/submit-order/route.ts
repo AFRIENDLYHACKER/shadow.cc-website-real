@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
-import { sendServiceOrderConfirmation, sendAdminOrderNotification } from '@/lib/email'
+import { Redis } from '@upstash/redis'
+import crypto from 'crypto'
+import { sendServiceOrderConfirmation } from '@/lib/email'
+
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 
 export async function POST(request: Request) {
   try {
@@ -10,58 +17,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    console.log('[v0] Submitting order:', { name, email, serviceName, tierName, tierPrice })
+    // Generate a unique order ID
+    const orderId = crypto.randomBytes(16).toString('hex')
 
-    // Send both emails - don't let one failure block the other
-    const [customerResult, adminResult] = await Promise.allSettled([
-      sendServiceOrderConfirmation({
-        customerEmail: email,
-        customerName: name,
+    // Store the order as pending in Redis (expires in 7 days)
+    await redis.set(
+      `order:${orderId}`,
+      JSON.stringify({
+        name,
+        email,
+        discord: discord || '',
+        details,
         serviceName,
         tierName,
         tierPrice,
-        discord,
-        details,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
       }),
-      sendAdminOrderNotification({
-        customerName: name,
-        customerEmail: email,
-        serviceName,
-        tierName,
-        tierPrice,
-        discord,
-        details,
-      }),
-    ])
+      { ex: 60 * 60 * 24 * 7 }
+    )
 
-    const customerOk = customerResult.status === 'fulfilled' && customerResult.value.success
-    const adminOk = adminResult.status === 'fulfilled' && adminResult.value.success
+    // Only send the customer confirmation email with a CONFIRM button
+    // Admin does NOT get notified until customer clicks confirm
+    const customerResult = await sendServiceOrderConfirmation({
+      customerEmail: email,
+      customerName: name,
+      serviceName,
+      tierName,
+      tierPrice,
+      discord,
+      details,
+      orderId,
+    })
 
-    console.log('[v0] Email results - customer:', customerOk, 'admin:', adminOk)
-
-    if (customerResult.status === 'rejected') {
-      console.error('[v0] Customer email rejected:', customerResult.reason)
-    }
-    if (adminResult.status === 'rejected') {
-      console.error('[v0] Admin email rejected:', adminResult.reason)
-    }
-
-    // As long as at least one email worked, call it a success
-    if (!customerOk && !adminOk) {
+    if (!customerResult.success) {
       return NextResponse.json(
-        { error: 'Failed to send emails. Your order has been noted. Please contact support.' },
+        { error: 'Failed to send confirmation email. Please try again or contact support.' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Order submitted successfully',
-      emailSent: customerOk,
-      adminNotified: adminOk,
+      message: 'Order submitted. Check your email to confirm.',
     })
   } catch (error) {
-    console.error('[v0] Error submitting order:', error)
+    console.error('Error submitting order:', error)
     return NextResponse.json(
       { error: 'Something went wrong. Please contact support.' },
       { status: 500 }

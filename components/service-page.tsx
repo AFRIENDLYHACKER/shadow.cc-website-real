@@ -167,9 +167,9 @@ export default function ServicePage({ title, subtitle, description, icon, tiers,
                 <div className="w-14 h-14 border border-green-500/30 bg-green-500/5 rounded-md flex items-center justify-center mx-auto mb-4">
                   <svg className="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <h3 className="text-lg font-mono font-bold text-white tracking-wide mb-2">ORDER SUBMITTED</h3>
-                <p className="text-zinc-500 text-sm font-mono mb-2">We will contact you within 24 hours to discuss your project and process payment.</p>
-                <p className="text-zinc-600 text-xs font-mono mb-6">A confirmation email has been sent to {formData.email}</p>
+                <h3 className="text-lg font-mono font-bold text-white tracking-wide mb-2">CHECK YOUR EMAIL</h3>
+                <p className="text-zinc-500 text-sm font-mono mb-2">We sent a confirmation email to <strong className="text-white">{formData.email}</strong></p>
+                <p className="text-yellow-500/80 text-xs font-mono mb-6">You must click the CONFIRM ORDER button in the email to finalize your order.</p>
                 <Link href="/" className="inline-flex items-center gap-2 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all">
                   BACK TO HOME
                 </Link>
