@@ -292,7 +292,7 @@ function VisitorCounter() {
 // ── Footer ──
 function Footer() {
   return (
-    <footer className="py-10 sm:py-14 px-4 sm:px-6 border-t border-red-900/15 bg-[#060606]">
+    <footer className="relative z-10 py-10 sm:py-14 px-4 sm:px-6 border-t border-red-900/15 bg-[#060606]">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
