@@ -35,11 +35,21 @@ export async function startCheckoutSession(cartItems: CartItem[]) {
     }
   })
 
+  // Store cart items in session metadata so we can reliably look up product IDs later
+  const cartMetadata: Record<string, string> = {
+    cart_items: JSON.stringify(cartItems.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }))),
+  }
+
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'embedded',
     line_items: lineItems,
     mode: 'payment',
     return_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+    metadata: cartMetadata,
+    allow_promotion_codes: true,
   })
 
   return { clientSecret: session.client_secret }

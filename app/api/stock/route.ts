@@ -3,7 +3,7 @@ import { getAllStock } from '@/lib/keys'
 
 export async function GET() {
   try {
-    const stock = getAllStock()
+    const stock = await getAllStock()
     return NextResponse.json({ stock })
   } catch (error) {
     console.error('Error getting stock:', error)

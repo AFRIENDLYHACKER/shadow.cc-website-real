@@ -15,7 +15,7 @@ export const PRODUCTS: Product[] = [
     id: 'shadow-weekly',
     name: 'Weekly Key',
     description: 'Perfect for trying out Shadow Script. Full access for 7 days.',
-    priceInCents: 499,
+    priceInCents: 100,
     category: 'Keys',
     duration: '7 Days',
     features: [
@@ -31,7 +31,7 @@ export const PRODUCTS: Product[] = [
     id: 'shadow-monthly',
     name: 'Monthly Key',
     description: 'Best value for regular users. Full access for 30 days.',
-    priceInCents: 1499,
+    priceInCents: 300,
     category: 'Keys',
     duration: '30 Days',
     popular: true,
@@ -49,7 +49,7 @@ export const PRODUCTS: Product[] = [
     id: 'shadow-lifetime',
     name: 'Lifetime Key',
     description: 'One-time purchase. Never pay again with permanent access.',
-    priceInCents: 4999,
+    priceInCents: 500,
     category: 'Keys',
     duration: 'Forever',
     features: [

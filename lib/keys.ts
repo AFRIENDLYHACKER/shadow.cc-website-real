@@ -1,142 +1,134 @@
+import { Redis } from '@upstash/redis'
 import fs from 'fs'
 import path from 'path'
+import crypto from 'crypto'
 
-const KEYS_FILE_PATH = path.join(process.cwd(), 'data', 'keys.txt')
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 
-export interface KeyEntry {
-  key: string
-  productId: string
+const PRODUCT_IDS = ['shadow-weekly', 'shadow-monthly', 'shadow-lifetime'] as const
+const REDIS_KEYS = PRODUCT_IDS.map((id) => `keys:${id}`)
+
+/**
+ * Parse data/keys.txt and return keys grouped by product ID.
+ * Format per line: KEY|PRODUCT_ID
+ * Lines starting with # or empty lines are ignored.
+ */
+function parseKeysFile(): Record<string, string[]> {
+  const filePath = path.join(process.cwd(), 'data', 'keys.txt')
+  const raw = fs.readFileSync(filePath, 'utf-8')
+  const result: Record<string, string[]> = {}
+
+  for (const id of PRODUCT_IDS) {
+    result[id] = []
+  }
+
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const [key, productId] = trimmed.split('|')
+    if (key && productId && result[productId]) {
+      result[productId]!.push(key)
+    }
+  }
+
+  return result
 }
 
-// Read all keys from file
-export function readKeys(): KeyEntry[] {
-  try {
-    if (!fs.existsSync(KEYS_FILE_PATH)) {
-      return []
-    }
-    
-    const content = fs.readFileSync(KEYS_FILE_PATH, 'utf-8')
-    const lines = content.split('\n')
-    const keys: KeyEntry[] = []
-    
-    for (const line of lines) {
-      const trimmed = line.trim()
-      // Skip empty lines and comments
-      if (!trimmed || trimmed.startsWith('#')) continue
-      
-      const [key, productId] = trimmed.split('|')
-      if (key && productId) {
-        keys.push({ key: key.trim(), productId: productId.trim() })
+/**
+ * Hash the keys.txt content so we can detect changes across deploys.
+ */
+function getKeysFileHash(): string {
+  const filePath = path.join(process.cwd(), 'data', 'keys.txt')
+  const raw = fs.readFileSync(filePath, 'utf-8')
+  return crypto.createHash('sha256').update(raw).digest('hex').slice(0, 16)
+}
+
+/**
+ * Ensure Redis is synced with the current keys.txt.
+ * Runs on every cold start / first request. If the hash of keys.txt
+ * has changed since the last seed, Redis is cleared and re-seeded.
+ */
+let _seeded = false
+async function ensureKeysSeeded(): Promise<void> {
+  if (_seeded) return
+
+  const fileHash = getKeysFileHash()
+  const seedFlag = `keys:seed-hash`
+  const storedHash = await redis.get<string>(seedFlag)
+
+  if (storedHash === fileHash) {
+    _seeded = true
+    return
+  }
+
+  // Hash mismatch or first seed — clear and re-seed
+  const pipeline = redis.pipeline()
+  for (const rk of REDIS_KEYS) {
+    pipeline.del(rk)
+  }
+  await pipeline.exec()
+
+  const keys = parseKeysFile()
+
+  for (const productId of PRODUCT_IDS) {
+    const productKeys = keys[productId]
+    if (!productKeys || productKeys.length === 0) continue
+
+    // Push in batches of 20 to stay within Upstash pipeline limits
+    for (let i = 0; i < productKeys.length; i += 20) {
+      const batch = productKeys.slice(i, i + 20)
+      const batchPipeline = redis.pipeline()
+      for (const key of batch) {
+        batchPipeline.rpush(`keys:${productId}`, key)
       }
+      await batchPipeline.exec()
     }
-    
-    return keys
-  } catch (error) {
-    console.error('Error reading keys file:', error)
-    return []
   }
+
+  // Store the hash so we don't re-seed until keys.txt changes
+  await redis.set(seedFlag, fileHash)
+  _seeded = true
 }
 
-// Get stock count for a specific product
-export function getStock(productId: string): number {
-  const keys = readKeys()
-  return keys.filter(k => k.productId === productId).length
+// ── Public API ──
+
+export async function getStock(productId: string): Promise<number> {
+  await ensureKeysSeeded()
+  return redis.llen(`keys:${productId}`)
 }
 
-// Get stock for all products
-export function getAllStock(): Record<string, number> {
-  const keys = readKeys()
+export async function getAllStock(): Promise<Record<string, number>> {
+  await ensureKeysSeeded()
+
   const stock: Record<string, number> = {}
-  
-  for (const key of keys) {
-    stock[key.productId] = (stock[key.productId] || 0) + 1
+  const pipeline = redis.pipeline()
+  for (const id of PRODUCT_IDS) {
+    pipeline.llen(`keys:${id}`)
   }
-  
+  const results = await pipeline.exec<number[]>()
+
+  for (let i = 0; i < PRODUCT_IDS.length; i++) {
+    stock[PRODUCT_IDS[i]] = results[i] ?? 0
+  }
   return stock
 }
 
-// Claim a key for a product (removes it from file)
-export function claimKey(productId: string): string | null {
-  try {
-    const keys = readKeys()
-    const keyIndex = keys.findIndex(k => k.productId === productId)
-    
-    if (keyIndex === -1) {
-      return null // No keys available
-    }
-    
-    const claimedKey = keys[keyIndex].key
-    
-    // Remove the key from the array
-    keys.splice(keyIndex, 1)
-    
-    // Rewrite the file without the claimed key
-    const newContent = buildKeysFileContent(keys)
-    fs.writeFileSync(KEYS_FILE_PATH, newContent, 'utf-8')
-    
-    return claimedKey
-  } catch (error) {
-    console.error('Error claiming key:', error)
-    return null
-  }
+export async function claimKey(productId: string): Promise<string | null> {
+  await ensureKeysSeeded()
+  const key = await redis.lpop<string>(`keys:${productId}`)
+  return key ?? null
 }
 
-// Helper to rebuild keys file content
-function buildKeysFileContent(keys: KeyEntry[]): string {
-  const header = `# Shadow.CC License Keys
-# Format: KEY|PRODUCT_ID
-# Add your keys below (one per line):
-#
-`
-  
-  // Group keys by product
-  const grouped: Record<string, string[]> = {}
-  for (const { key, productId } of keys) {
-    if (!grouped[productId]) {
-      grouped[productId] = []
-    }
-    grouped[productId].push(key)
-  }
-  
-  let content = header
-  
-  // Write each group
-  const productOrder = ['shadow-weekly', 'shadow-monthly', 'shadow-lifetime']
-  const productLabels: Record<string, string> = {
-    'shadow-weekly': '# Weekly Keys',
-    'shadow-monthly': '# Monthly Keys',
-    'shadow-lifetime': '# Lifetime Keys',
-  }
-  
-  for (const productId of productOrder) {
-    if (grouped[productId] && grouped[productId].length > 0) {
-      content += `${productLabels[productId] || `# ${productId}`}\n`
-      for (const key of grouped[productId]) {
-        content += `${key}|${productId}\n`
-      }
-    }
-  }
-  
-  // Add any other products not in the order
-  for (const productId of Object.keys(grouped)) {
-    if (!productOrder.includes(productId)) {
-      content += `# ${productId}\n`
-      for (const key of grouped[productId]) {
-        content += `${key}|${productId}\n`
-      }
-    }
-  }
-  
-  return content
-}
-
-// Add keys to file (for admin use)
-export function addKeys(keys: KeyEntry[]): boolean {
+export async function addKeys(entries: { key: string; productId: string }[]): Promise<boolean> {
   try {
-    const existingKeys = readKeys()
-    const allKeys = [...existingKeys, ...keys]
-    const newContent = buildKeysFileContent(allKeys)
-    fs.writeFileSync(KEYS_FILE_PATH, newContent, 'utf-8')
+    const pipeline = redis.pipeline()
+    for (const { key, productId } of entries) {
+      pipeline.rpush(`keys:${productId}`, key)
+    }
+    await pipeline.exec()
     return true
   } catch (error) {
     console.error('Error adding keys:', error)
