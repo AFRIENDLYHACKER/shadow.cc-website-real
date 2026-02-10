@@ -26,7 +26,7 @@ export async function sendServiceOrderConfirmation({
   details: string
   orderId: string
 }) {
-  const confirmUrl = `${SITE_URL}/api/confirm-order?id=${orderId}`
+  const confirmUrl = `${SITE_URL}/confirm-order?id=${orderId}`
 
   try {
     const result = await resend.emails.send({
