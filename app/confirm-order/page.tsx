@@ -1,6 +1,16 @@
+'use client'
+
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
 
 const statuses: Record<string, { icon: string; title: string; desc: string; color: string }> = {
+  confirming: {
+    icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+    title: 'CONFIRMING ORDER...',
+    desc: 'Please wait while we confirm your order.',
+    color: 'yellow',
+  },
   confirmed: {
     icon: 'M5 13l4 4L19 7',
     title: 'ORDER CONFIRMED',
@@ -33,9 +43,29 @@ const statuses: Record<string, { icon: string; title: string; desc: string; colo
   },
 }
 
-export default async function ConfirmOrderPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const { status: statusKey } = await searchParams
-  const status = statuses[statusKey || ''] || statuses.invalid
+function ConfirmOrderContent() {
+  const searchParams = useSearchParams()
+  const orderId = searchParams.get('id')
+  const [statusKey, setStatusKey] = useState(orderId ? 'confirming' : 'invalid')
+
+  useEffect(() => {
+    if (!orderId) return
+
+    fetch('/api/confirm-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        setStatusKey(data.status || 'error')
+      })
+      .catch(() => {
+        setStatusKey('error')
+      })
+  }, [orderId])
+
+  const status = statuses[statusKey] || statuses.invalid
 
   const borderColor = status.color === 'green' ? 'border-green-500/30' : status.color === 'yellow' ? 'border-yellow-500/30' : 'border-red-500/30'
   const bgColor = status.color === 'green' ? 'bg-green-500/5' : status.color === 'yellow' ? 'bg-yellow-500/5' : 'bg-red-500/5'
@@ -47,27 +77,41 @@ export default async function ConfirmOrderPage({ searchParams }: { searchParams:
     <div className="min-h-screen bg-[#030303] text-white noise scanline flex items-center justify-center px-4">
       <div className={`${bgColor} border ${borderColor} rounded-lg p-8 sm:p-12 text-center max-w-md w-full`}>
         <div className={`w-16 h-16 border ${iconBorder} ${iconBg} rounded-lg flex items-center justify-center mx-auto mb-5`}>
-          <svg className={`w-8 h-8 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-8 h-8 ${iconColor} ${statusKey === 'confirming' ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={status.icon} />
           </svg>
         </div>
         <h1 className="text-xl font-mono font-bold text-white tracking-wider mb-3">{status.title}</h1>
         <p className="text-zinc-400 text-sm font-mono leading-relaxed mb-8">{status.desc}</p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all"
-          >
-            BACK TO HOME
-          </Link>
-          <Link
-            href="/support"
-            className="inline-flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all"
-          >
-            CONTACT SUPPORT
-          </Link>
-        </div>
+        {statusKey !== 'confirming' && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all"
+            >
+              BACK TO HOME
+            </Link>
+            <Link
+              href="/support"
+              className="inline-flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all"
+            >
+              CONTACT SUPPORT
+            </Link>
+          </div>
+        )}
       </div>
     </div>
+  )
+}
+
+export default function ConfirmOrderPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center">
+        <p className="text-zinc-500 font-mono text-sm animate-pulse">Loading...</p>
+      </div>
+    }>
+      <ConfirmOrderContent />
+    </Suspense>
   )
 }
