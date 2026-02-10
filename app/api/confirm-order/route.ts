@@ -7,36 +7,24 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN!,
 })
 
-function getSiteUrl(request: Request): string {
-  // Use configured site URL, fall back to request origin
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
-  }
-  const url = new URL(request.url)
-  return url.origin
-}
-
-export async function GET(request: Request) {
-  const base = getSiteUrl(request)
-
+export async function POST(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const orderId = searchParams.get('id')
+    const { orderId } = await request.json()
 
     if (!orderId) {
-      return NextResponse.redirect(`${base}/confirm-order?status=invalid`)
+      return NextResponse.json({ status: 'invalid' }, { status: 400 })
     }
 
     const raw = await redis.get<string>(`order:${orderId}`)
 
     if (!raw) {
-      return NextResponse.redirect(`${base}/confirm-order?status=expired`)
+      return NextResponse.json({ status: 'expired' }, { status: 404 })
     }
 
     const order = typeof raw === 'string' ? JSON.parse(raw) : raw
 
     if (order.status === 'confirmed') {
-      return NextResponse.redirect(`${base}/confirm-order?status=already`)
+      return NextResponse.json({ status: 'already' })
     }
 
     // Mark as confirmed
@@ -55,9 +43,9 @@ export async function GET(request: Request) {
       details: order.details,
     })
 
-    return NextResponse.redirect(`${base}/confirm-order?status=confirmed`)
+    return NextResponse.json({ status: 'confirmed' })
   } catch (error) {
     console.error('Error confirming order:', error)
-    return NextResponse.redirect(`${base}/confirm-order?status=error`)
+    return NextResponse.json({ status: 'error' }, { status: 500 })
   }
 }
