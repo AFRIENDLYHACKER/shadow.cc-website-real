@@ -35,11 +35,43 @@ export default function ServicePage({ title, subtitle, description, icon, tiers,
     details: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app this would send to an API
-    setSubmitted(true)
+    if (!selectedTier) return
+
+    setSubmitting(true)
+    setSubmitError('')
+
+    try {
+      const res = await fetch('/api/submit-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          discord: formData.discord,
+          details: formData.details,
+          serviceName: title,
+          tierName: selectedTier.name,
+          tierPrice: selectedTier.price,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setSubmitError(data.error || 'Something went wrong. Please try again.')
+      } else {
+        setSubmitted(true)
+      }
+    } catch {
+      setSubmitError('Network error. Please try again or contact support.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -135,8 +167,9 @@ export default function ServicePage({ title, subtitle, description, icon, tiers,
                 <div className="w-14 h-14 border border-green-500/30 bg-green-500/5 rounded-md flex items-center justify-center mx-auto mb-4">
                   <svg className="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <h3 className="text-lg font-mono font-bold text-white tracking-wide mb-2">ORDER SUBMITTED</h3>
-                <p className="text-zinc-500 text-sm font-mono mb-6">We will contact you within 24 hours to discuss your project and process payment.</p>
+                <h3 className="text-lg font-mono font-bold text-white tracking-wide mb-2">CHECK YOUR EMAIL</h3>
+                <p className="text-zinc-500 text-sm font-mono mb-2">We sent a confirmation email to <strong className="text-white">{formData.email}</strong></p>
+                <p className="text-yellow-500/80 text-xs font-mono mb-6">You must click the CONFIRM ORDER button in the email to finalize your order.</p>
                 <Link href="/" className="inline-flex items-center gap-2 border border-zinc-700 hover:border-zinc-500 bg-white/[0.02] text-zinc-300 font-mono font-semibold py-3 px-6 rounded-md text-xs tracking-wider transition-all">
                   BACK TO HOME
                 </Link>
@@ -225,19 +258,33 @@ export default function ServicePage({ title, subtitle, description, icon, tiers,
                         placeholder="Describe what you need built..."
                       />
                     </div>
+                    {submitError && (
+                      <div className="bg-red-600/5 border border-red-600/20 rounded-md p-3">
+                        <p className="text-red-400 text-xs font-mono">{submitError}</p>
+                      </div>
+                    )}
                     <button
                       type="submit"
-                      disabled={!selectedTier}
+                      disabled={!selectedTier || submitting}
                       className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-md font-mono text-sm font-semibold tracking-wider transition-all ${
-                        selectedTier
+                        selectedTier && !submitting
                           ? 'bg-red-600 hover:bg-red-700 text-white glow-red'
                           : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
                       }`}
                     >
-                      {selectedTier ? `SUBMIT ORDER - ${selectedTier.price}` : 'SELECT A TIER FIRST'}
+                      {submitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          SUBMITTING...
+                        </>
+                      ) : selectedTier ? (
+                        `SUBMIT ORDER - ${selectedTier.price}`
+                      ) : (
+                        'SELECT A TIER FIRST'
+                      )}
                     </button>
                     <p className="text-[10px] font-mono text-zinc-600 text-center tracking-wider">
-                      Payment will be arranged after we discuss your project.
+                      Payment will be arranged after we discuss your project. A confirmation email will be sent.
                     </p>
                   </form>
                 </div>
