@@ -456,6 +456,7 @@ export default function HomePage() {
             <VisitorCounter />
           </div>
         </section>
+
         <section className="px-4 sm:px-6 py-10 sm:py-14 border-y border-red-900/15">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {[
@@ -471,6 +472,7 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
         <section id="products" className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -487,6 +489,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section className="py-16 sm:py-24 px-4 sm:px-6 border-y border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="max-w-5xl mx-auto relative z-10">
@@ -509,6 +512,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -554,6 +558,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section id="reviews" className="py-16 sm:py-24 px-4 sm:px-6 border-y border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-20" />
           <div className="max-w-5xl mx-auto relative z-10">
@@ -563,21 +568,42 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {testimonials.map((review, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className="bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-5 sm:p-6 transition-all flex flex-col"
                 >
-                  <div className="flex items-center gap-1 mb-3">
-                    {Array.from({ length: Math.floor(review.rating) }).map((_, j) => (
-                      <svg key={j} className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                    {review.rating % 1 === 0.5 && (
-                      <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 2.5c.3 0 .6.1.8.4l1.4 2.8 3.1.4c.4.1.7.4.8.8.1.4 0 .8-.3 1.1l-2.2 2.2.5 3.1c.1.4-.1.8-.5 1-.4.2-.8.2-1.1-.1l-2.8-1.5-2.8 1.5c-.3.2-.7.3-1.1.1-.4-.2-.6-.6-.5-1l.5-3.1-2.2-2.2c-.3-.3-.4-.7-.3-1.1.1-.4.4-.7.8-.8l3.1-.4 1.4-2.8c.2-.3.5-.4.8-.4z" />
-                      </svg>
-                    )}
+                  <div className="flex items-center gap-0.5 mb-3">
+                    {[...Array(5)].map((_, j) => {
+                      const starValue = j + 1
+                      if (review.rating >= starValue) {
+                        return (
+                          <svg key={j} className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        )
+                      } else if (review.rating > j && review.rating < starValue) {
+                        return (
+                          <svg key={j} className="w-3.5 h-3.5 text-red-500" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                              <linearGradient id={`halfStar${i}${j}`}>
+                                <stop offset="50%" stopColor="currentColor" />
+                                <stop offset="50%" stopColor="#4b5563" />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              fill={`url(#halfStar${i}${j})`}
+                              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                            />
+                          </svg>
+                        )
+                      } else {
+                        return (
+                          <svg key={j} className="w-3.5 h-3.5 text-zinc-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        )
+                      }
+                    })}
                   </div>
                   <p className="text-zinc-300 text-xs leading-relaxed mb-4 flex-1">"{review.text}"</p>
                   <div className="border-t border-zinc-800/50 pt-3 mt-auto">
@@ -589,6 +615,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -628,6 +655,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="max-w-3xl mx-auto relative z-10 text-center">
@@ -663,6 +691,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -681,11 +710,10 @@ export default function HomePage() {
               ].map((faq, i) => (
                 <div key={i} className="border border-zinc-800 hover:border-zinc-700 rounded-lg overflow-hidden transition-colors">
                   <button
-                    onClick={() => {}}
                     className="w-full flex items-center justify-between p-4 sm:p-5 text-left gap-4"
                   >
                     <span className="text-white text-sm font-mono">{faq.q}</span>
-                    <svg className="w-4 h-4 text-red-500/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-red-500/60 flex-shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
