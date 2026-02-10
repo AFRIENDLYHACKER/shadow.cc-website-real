@@ -7,6 +7,7 @@ async function createPromoCodes() {
     { coupon: '5aEZsOrb', code: 'SAVE10' },
     { coupon: 'espohSib', code: 'SAVE25' },
     { coupon: 'pvaYKtRS', code: 'DOLLAROFF' },
+    { coupon: 'promo_1SzN2wHlAnSAKK2BHB6OPljs', code: 'SHADOWCC' },
   ]
 
   for (const { coupon, code } of codes) {
