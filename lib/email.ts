@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'support@shadowcc.shop'
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'support@shadowcc.shop'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://shadowcc.shop'
 
 // ── Customer confirmation email with CONFIRM ORDER button ──
