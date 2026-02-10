@@ -362,8 +362,8 @@ export default function HomePage() {
       description: 'Premium Roblox scripts with advanced features, auto farm, ESP, aimbot, and more. Instant key delivery.',
       icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z',
       href: '/roblox',
-      tag: 'ACTIVE',
-      tagColor: 'green',
+      tag: 'UPDATING - Can still buy key',
+      tagColor: 'yellow',
       features: ['50+ Supported Games', 'Auto Updates Daily', 'Instant Key Delivery', 'Weekly / Monthly / Lifetime'],
     },
     {
