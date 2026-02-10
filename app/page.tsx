@@ -1,21 +1,17 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-// ── Loading Screen ──
 function LoadingScreen({ onFinish }: { onFinish: () => void }) {
   const [progress, setProgress] = useState(0)
   const [fadeOut, setFadeOut] = useState(false)
   const [statusText, setStatusText] = useState('INITIALIZING')
-
   useEffect(() => {
     const messages = ['INITIALIZING', 'LOADING MODULES', 'CONNECTING', 'DECRYPTING', 'READY']
     const duration = 2000
     const interval = 16
     const steps = duration / interval
     let step = 0
-
     const timer = setInterval(() => {
       step++
       const eased = 1 - Math.pow(1 - step / steps, 3)
@@ -30,10 +26,8 @@ function LoadingScreen({ onFinish }: { onFinish: () => void }) {
         }, 400)
       }
     }, interval)
-
     return () => clearInterval(timer)
   }, [onFinish])
-
   return (
     <div className={`fixed inset-0 z-[100] bg-[#030303] flex flex-col items-center justify-center transition-opacity duration-600 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
       <div className="absolute inset-0 grid-bg opacity-40" />
@@ -59,23 +53,19 @@ function LoadingScreen({ onFinish }: { onFinish: () => void }) {
   )
 }
 
-// ── Particle Network Background ──
 function ParticleBackground() {
   useEffect(() => {
     const canvas = document.getElementById('particles') as HTMLCanvasElement
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-
     let animId: number
     const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
     resize()
     window.addEventListener('resize', resize)
-
     interface Particle { x: number; y: number; vx: number; vy: number; size: number; alpha: number }
     const particles: Particle[] = []
     const count = window.innerWidth < 640 ? 25 : 60
-
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -86,22 +76,18 @@ function ParticleBackground() {
         alpha: Math.random() * 0.5 + 0.2,
       })
     }
-
     const animate = () => {
       ctx.fillStyle = 'rgba(3, 3, 3, 0.08)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
       particles.forEach((p, i) => {
         p.x += p.vx
         p.y += p.vy
         if (p.x < 0 || p.x > canvas.width) p.vx *= -1
         if (p.y < 0 || p.y > canvas.height) p.vy *= -1
-
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(220, 38, 38, ${p.alpha})`
         ctx.fill()
-
         particles.slice(i + 1).forEach(p2 => {
           const dx = p.x - p2.x
           const dy = p.y - p2.y
@@ -119,34 +105,28 @@ function ParticleBackground() {
       animId = requestAnimationFrame(animate)
     }
     animate()
-
     return () => {
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(animId)
     }
   }, [])
-
   return <canvas id="particles" className="fixed inset-0 pointer-events-none z-0" />
 }
 
-// ── Header ──
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
   const navLinks = [
     { label: 'PRODUCTS', href: '#products' },
     { label: 'SERVICES', href: '#services' },
     { label: 'REVIEWS', href: '#reviews' },
     { label: 'SUPPORT', href: '/support' },
   ]
-
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#030303]/90 backdrop-blur-xl border-b border-red-900/20' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -158,7 +138,6 @@ function Header() {
           </div>
           <span className="text-base sm:text-lg font-mono font-bold text-white tracking-wider group-hover:text-red-500 transition-colors">SHADOW<span className="text-red-500">.</span>CC</span>
         </Link>
-
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map(l => (
             <Link key={l.label} href={l.href} className="px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 rounded-md transition-all font-mono tracking-wide">
@@ -166,7 +145,6 @@ function Header() {
             </Link>
           ))}
         </nav>
-
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden border border-zinc-700 hover:border-zinc-500 rounded-md p-2 transition-colors"
@@ -179,7 +157,6 @@ function Header() {
           )}
         </button>
       </div>
-
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-red-900/20 bg-[#030303]/95 backdrop-blur-xl">
           <div className="flex flex-col px-4 py-2">
@@ -195,7 +172,6 @@ function Header() {
   )
 }
 
-// ── Product/Service Card ──
 interface ServiceCard {
   title: string
   description: string
@@ -212,11 +188,9 @@ function ProductServiceCard({ card }: { card: ServiceCard }) {
     green: 'bg-green-500/10 border-green-500/30 text-green-400',
     yellow: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
   }
-
   return (
     <Link href={card.href} className="group relative block">
       <div className="relative bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-6 sm:p-7 h-full flex flex-col transition-all duration-300 group-hover:translate-y-[-2px]">
-        {/* Tag */}
         <div className="flex items-center justify-between mb-5">
           <div className={`w-12 h-12 border border-red-600/30 bg-red-600/5 rounded-md flex items-center justify-center group-hover:bg-red-600/10 transition-colors`}>
             <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,11 +201,8 @@ function ProductServiceCard({ card }: { card: ServiceCard }) {
             {card.tag}
           </span>
         </div>
-
         <h3 className="text-lg font-mono font-bold text-white tracking-wide mb-2">{card.title}</h3>
         <p className="text-zinc-500 text-sm leading-relaxed mb-5">{card.description}</p>
-
-        {/* Features */}
         <ul className="space-y-2 mb-6 flex-1">
           {card.features.map((f, i) => (
             <li key={i} className="flex items-center gap-2.5 text-xs text-zinc-400">
@@ -242,8 +213,6 @@ function ProductServiceCard({ card }: { card: ServiceCard }) {
             </li>
           ))}
         </ul>
-
-        {/* CTA */}
         <div className="flex items-center justify-between border-t border-zinc-800/50 pt-5">
           <span className="text-xs font-mono text-zinc-500 tracking-wider group-hover:text-red-400 transition-colors">
             {card.tag === 'COMING SOON' ? 'LEARN MORE' : 'VIEW DETAILS'}
@@ -257,19 +226,15 @@ function ProductServiceCard({ card }: { card: ServiceCard }) {
   )
 }
 
-// ── Visitor Counter ──
 function VisitorCounter() {
   const [stats, setStats] = useState<{ total: number; active: number } | null>(null)
-
   useEffect(() => {
     fetch('/api/visitors')
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {})
   }, [])
-
   if (!stats) return null
-
   return (
     <div className="flex items-center justify-center gap-4 sm:gap-6">
       <div className="flex items-center gap-2">
@@ -289,13 +254,11 @@ function VisitorCounter() {
   )
 }
 
-// ── Footer ──
 function Footer() {
   return (
     <footer className="relative z-10 py-10 sm:py-14 px-4 sm:px-6 border-t border-red-900/15 bg-[#060606]">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-          {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 group mb-3">
               <div className="w-7 h-7 border border-red-600/40 rounded-md flex items-center justify-center bg-red-600/5">
@@ -307,8 +270,6 @@ function Footer() {
             </Link>
             <p className="text-white text-xs font-mono leading-relaxed">Premium digital services. Scripts, websites, bots, AI, and security.</p>
           </div>
-
-          {/* Products */}
           <div>
             <h4 className="text-[10px] font-mono font-bold text-white tracking-[0.2em] mb-4">PRODUCTS</h4>
             <div className="flex flex-col gap-2.5">
@@ -316,8 +277,6 @@ function Footer() {
               <Link href="/antivirus" className="text-white hover:text-red-400 transition-colors text-xs font-mono">Antivirus</Link>
             </div>
           </div>
-
-          {/* Services */}
           <div>
             <h4 className="text-[10px] font-mono font-bold text-white tracking-[0.2em] mb-4">SERVICES</h4>
             <div className="flex flex-col gap-2.5">
@@ -326,8 +285,6 @@ function Footer() {
               <Link href="/services/ai" className="text-white hover:text-red-400 transition-colors text-xs font-mono">AI Solutions</Link>
             </div>
           </div>
-
-          {/* Company */}
           <div>
             <h4 className="text-[10px] font-mono font-bold text-white tracking-[0.2em] mb-4">COMPANY</h4>
             <div className="flex flex-col gap-2.5">
@@ -338,7 +295,6 @@ function Footer() {
             </div>
           </div>
         </div>
-
         <div className="border-t border-zinc-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-white text-[10px] font-mono tracking-wider">2026 SHADOW.CC. ALL RIGHTS RESERVED.</p>
           <a href="https://discord.gg/Kezxm2TyGY" target="_blank" rel="noopener noreferrer" className="text-white hover:text-red-400 transition-colors" aria-label="Discord">
@@ -352,7 +308,6 @@ function Footer() {
   )
 }
 
-// ── Main Homepage ──
 export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
@@ -413,18 +368,54 @@ export default function HomePage() {
     },
   ]
 
+  const testimonials = [
+    {
+      name: 'kyleplays09',
+      role: 'Blox Fruits grinder',
+      text: 'monthly key since november. auto farm is decent, mostly afk overnight without bans so far. esp sometimes flickers on mobile but works fine on pc. support guy fixed a config issue in like 20 mins when i dm’d at 2am. 8/10 would buy again',
+      rating: 4,
+    },
+    {
+      name: 'Jordy | 5.1k server',
+      role: 'server owner',
+      text: 'custom bot - tickets + leveling + auto role on join + warns. took 11 days total (was quoted 7–10). code is readable which is rare. had to ask for 2 extra config options after delivery but they added them free next day. pretty happy for $45',
+      rating: 4.5,
+    },
+    {
+      name: 'samantha_ecom',
+      role: 'dropshipping side gig',
+      text: 'got a clean shop site + product pages + mobile fixes for $40. looks way better than my old wix one. checkout works, loads fast. only thing is they used placeholder images at first and i had to send mine after. still, good value.',
+      rating: 4,
+    },
+    {
+      name: 'RilezTTV',
+      role: 'just chatting streamer',
+      text: '$30 ai faq bot for discord. answers 80% of the usual !socials !schedule !lurk stuff. messes up sometimes when people use way too many emojis or abbreviations but honestly same. huge time saver during streams. recommend.',
+      rating: 4.5,
+    },
+    {
+      name: 'void_hunterz',
+      role: 'script user since oct 25',
+      text: 'lifetime key during december sale. updates are kinda inconsistent — sometimes 10 days nothing then 3 in a week. aimbot needs per-game sliders tbh, right now its too snappy on some titles. still better than the free ones by far. dev is active in #support',
+      rating: 4,
+    },
+    {
+      name: 'morgan.codes',
+      role: 'indie maker',
+      text: '$170 for nextjs + auth + stripe subs + supabase. delivered in 2.5 weeks. ui needed some polish on my end but logic was solid. replied at like 1am once when i was stuck — that was clutch. best cheap full-stack work ive found so far.',
+      rating: 4.5,
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-[#030303] text-white noise scanline">
       {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
       <ParticleBackground />
       <Header />
-
       <main className="relative z-10">
-        {/* ── Hero ── */}
         <section className="relative pt-32 sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 overflow-hidden">
           <div className="absolute top-24 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
           <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
-
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <div className="inline-flex items-center gap-2 border border-red-600/30 rounded-full px-4 py-1.5 mb-6 sm:mb-8 bg-red-600/5">
               <span className="relative flex h-2 w-2">
@@ -433,16 +424,13 @@ export default function HomePage() {
               </span>
               <span className="text-red-400 text-xs font-mono tracking-widest">DIGITAL SERVICES PLATFORM</span>
             </div>
-
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white mb-4 sm:mb-6 leading-[0.95] tracking-tight text-balance">
               BUILD<span className="text-red-500">.</span> PROTECT<span className="text-red-500">.</span><br />
               <span className="text-red-500 glow-red-text">DOMINATE</span>
             </h1>
-
             <p className="text-sm sm:text-lg text-zinc-500 mb-8 sm:mb-10 max-w-2xl mx-auto font-mono leading-relaxed text-pretty">
               Premium digital services from custom websites and Discord bots to AI solutions, game scripts, and security software. All under one roof.
             </p>
-
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
               <a
                 href="#products"
@@ -465,12 +453,9 @@ export default function HomePage() {
                 DISCORD
               </a>
             </div>
-
             <VisitorCounter />
           </div>
         </section>
-
-        {/* ── Stats ── */}
         <section className="px-4 sm:px-6 py-10 sm:py-14 border-y border-red-900/15">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {[
@@ -486,8 +471,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-
-        {/* ── Products & Services Grid ── */}
         <section id="products" className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -497,7 +480,6 @@ export default function HomePage() {
                 From game scripts to enterprise security. Choose your service.
               </p>
             </div>
-
             <div id="services" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {products.map((card, i) => (
                 <ProductServiceCard key={i} card={card} />
@@ -505,8 +487,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── How It Works ── */}
         <section className="py-16 sm:py-24 px-4 sm:px-6 border-y border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="max-w-5xl mx-auto relative z-10">
@@ -529,8 +509,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── Why Choose Us ── */}
         <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -576,8 +554,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── Testimonials ── */}
         <section id="reviews" className="py-16 sm:py-24 px-4 sm:px-6 border-y border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-20" />
           <div className="max-w-5xl mx-auto relative z-10">
@@ -586,54 +562,25 @@ export default function HomePage() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight text-balance">What Clients Say</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                {
-                  name: 'Alex M.',
-                  role: 'Roblox User',
-                  text: 'The script works flawlessly. Auto farm has been running for weeks with no issues. Key delivery was instant too.',
-                  rating: 5,
-                },
-                {
-                  name: 'Jordan K.',
-                  role: 'Discord Server Owner',
-                  text: 'Got a custom bot built for my community. Moderation, tickets, leveling -- everything works perfectly. Best $40 I ever spent.',
-                  rating: 5,
-                },
-                {
-                  name: 'Sam T.',
-                  role: 'Small Business Owner',
-                  text: 'They built my company website in 3 days. Clean design, fast loading, and the price was way cheaper than anywhere else.',
-                  rating: 5,
-                },
-                {
-                  name: 'Riley P.',
-                  role: 'Content Creator',
-                  text: 'The AI chatbot they built for my Discord handles FAQ questions so I do not have to. Saves me hours every week.',
-                  rating: 5,
-                },
-                {
-                  name: 'Casey D.',
-                  role: 'Game Developer',
-                  text: 'Lifetime key was worth every penny. Updates keep coming, new game support added regularly. Support team responds fast.',
-                  rating: 5,
-                },
-                {
-                  name: 'Morgan W.',
-                  role: 'Startup Founder',
-                  text: 'Had a full web app built with auth and database for $175. The quality is insane for the price. Highly recommend.',
-                  rating: 5,
-                },
-              ].map((review, i) => (
-                <div key={i} className="bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-5 sm:p-6 transition-all">
+              {testimonials.map((review, i) => (
+                <div 
+                  key={i} 
+                  className="bg-[#0a0a0a] border border-zinc-800 hover:border-red-900/40 rounded-lg p-5 sm:p-6 transition-all flex flex-col"
+                >
                   <div className="flex items-center gap-1 mb-3">
-                    {Array.from({ length: review.rating }).map((_, j) => (
+                    {Array.from({ length: Math.floor(review.rating) }).map((_, j) => (
                       <svg key={j} className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
+                    {review.rating % 1 === 0.5 && (
+                      <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2.5c.3 0 .6.1.8.4l1.4 2.8 3.1.4c.4.1.7.4.8.8.1.4 0 .8-.3 1.1l-2.2 2.2.5 3.1c.1.4-.1.8-.5 1-.4.2-.8.2-1.1-.1l-2.8-1.5-2.8 1.5c-.3.2-.7.3-1.1.1-.4-.2-.6-.6-.5-1l.5-3.1-2.2-2.2c-.3-.3-.4-.7-.3-1.1.1-.4.4-.7.8-.8l3.1-.4 1.4-2.8c.2-.3.5-.4.8-.4z" />
+                      </svg>
+                    )}
                   </div>
-                  <p className="text-zinc-400 text-xs leading-relaxed mb-4">{'"'}{review.text}{'"'}</p>
-                  <div className="border-t border-zinc-800/50 pt-3">
+                  <p className="text-zinc-300 text-xs leading-relaxed mb-4 flex-1">"{review.text}"</p>
+                  <div className="border-t border-zinc-800/50 pt-3 mt-auto">
                     <p className="text-white text-xs font-mono font-bold">{review.name}</p>
                     <p className="text-zinc-600 text-[10px] font-mono tracking-wider">{review.role.toUpperCase()}</p>
                   </div>
@@ -642,8 +589,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── Latest Updates ── */}
         <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10 sm:mb-14">
@@ -654,7 +599,6 @@ export default function HomePage() {
               </p>
             </div>
             <div className="relative">
-              {/* Timeline line */}
               <div className="absolute left-[7px] top-2 bottom-2 w-px bg-zinc-800" />
               <div className="space-y-6">
                 {[
@@ -684,8 +628,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── CTA Banner ── */}
         <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-red-900/15 relative">
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="max-w-3xl mx-auto relative z-10 text-center">
@@ -721,57 +663,39 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── FAQ ── */}
-        <FAQSection />
+        <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10 sm:mb-14">
+              <span className="text-[10px] font-mono text-red-500/60 tracking-[0.3em] block mb-2">// FAQ</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">Questions</h2>
+            </div>
+            <div className="space-y-2">
+              {[
+                { q: 'How do custom services work?', a: 'After purchasing a custom service (website, bot, or AI), you will be taken to a form where you provide your project details and contact information. We will reach out within 24 hours to discuss your project.' },
+                { q: 'How fast is Roblox script key delivery?', a: 'Instant. Your license key is delivered immediately after payment on the success page and via email.' },
+                { q: 'Why are your prices so low?', a: 'We keep overhead minimal and pass the savings to you. No middlemen, no corporate markup. Discord bots from $15, websites from $25, AI solutions from $25. Quality does not have to be expensive.' },
+                { q: 'Do you offer refunds?', a: 'We offer refunds within 24 hours of purchase if the product is not working as described. For custom services, refunds are handled on a case-by-case basis before work begins.' },
+                { q: 'Are the antivirus products available yet?', a: 'Both Android and PC antivirus software are currently in development. Join our Discord to be notified when they launch.' },
+                { q: 'Can I request custom features?', a: 'Absolutely. Every custom service (website, bot, AI) is built to your exact specifications. Just describe what you need in the order form and we will make it happen.' },
+                { q: 'How do I get support?', a: 'Visit our support page for email, phone, and Discord contact options. We respond within 24 hours.' },
+              ].map((faq, i) => (
+                <div key={i} className="border border-zinc-800 hover:border-zinc-700 rounded-lg overflow-hidden transition-colors">
+                  <button
+                    onClick={() => {}}
+                    className="w-full flex items-center justify-between p-4 sm:p-5 text-left gap-4"
+                  >
+                    <span className="text-white text-sm font-mono">{faq.q}</span>
+                    <svg className="w-4 h-4 text-red-500/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
-
       <Footer />
     </div>
-  )
-}
-
-// ── FAQ Section (with state) ──
-function FAQSection() {
-  const [open, setOpen] = useState<number | null>(null)
-  const faqs = [
-    { q: 'How do custom services work?', a: 'After purchasing a custom service (website, bot, or AI), you will be taken to a form where you provide your project details and contact information. We will reach out within 24 hours to discuss your project.' },
-    { q: 'How fast is Roblox script key delivery?', a: 'Instant. Your license key is delivered immediately after payment on the success page and via email.' },
-    { q: 'Why are your prices so low?', a: 'We keep overhead minimal and pass the savings to you. No middlemen, no corporate markup. Discord bots from $15, websites from $25, AI solutions from $25. Quality does not have to be expensive.' },
-    { q: 'Do you offer refunds?', a: 'We offer refunds within 24 hours of purchase if the product is not working as described. For custom services, refunds are handled on a case-by-case basis before work begins.' },
-    { q: 'Are the antivirus products available yet?', a: 'Both Android and PC antivirus software are currently in development. Join our Discord to be notified when they launch.' },
-    { q: 'Can I request custom features?', a: 'Absolutely. Every custom service (website, bot, AI) is built to your exact specifications. Just describe what you need in the order form and we will make it happen.' },
-    { q: 'How do I get support?', a: 'Visit our support page for email, phone, and Discord contact options. We respond within 24 hours.' },
-  ]
-
-  return (
-    <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10 sm:mb-14">
-          <span className="text-[10px] font-mono text-red-500/60 tracking-[0.3em] block mb-2">// FAQ</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">Questions</h2>
-        </div>
-        <div className="space-y-2">
-          {faqs.map((faq, i) => (
-            <div key={i} className="border border-zinc-800 hover:border-zinc-700 rounded-lg overflow-hidden transition-colors">
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between p-4 sm:p-5 text-left gap-4"
-              >
-                <span className="text-white text-sm font-mono">{faq.q}</span>
-                <svg className={`w-4 h-4 text-red-500/60 flex-shrink-0 transition-transform ${open === i ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {open === i && (
-                <div className="px-4 sm:px-5 pb-4 sm:pb-5">
-                  <p className="text-zinc-500 text-sm leading-relaxed">{faq.a}</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   )
 }
